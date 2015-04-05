@@ -1,203 +1,148 @@
 (*
-  file: ast.ml
-  author: Bob Muller
-  date: January 4, 2009
-
-  This file contains an abstract syntax for the programming language PEL.
-  The abstract syntax includes a few items that aren't used directly in
-  PEL but (some of which) are used in transformations on PEL programs.
+ * file: ast.ml
+ * author: Sam Baxter
+ * 
+ * This file lays out the abstract syntax of the language.
+ * A substitution function is implemented to handle
+ * substitutions of types and values in type checking
+ * and the evaluation process.
+ * A toString function is provided for the interactive display.
  *)
 
-module Environment = Environment.Environment;;
-module Sym = Symbol;;
-open Environment;;
-open Symbol;;
-
-type term = Id of Sym.t
-            | Abs of Sym.t * term * term
-            | App of term * term list
-            | CApp of term * term
-            | If of term * term * term
-            | And of term * term
-            | Or of term * term
-            | Bind of declaration
-            | Let of declaration * term
-            | Int of int
-            | IntType
-            | Bool of int
-            | BoolType
-            | Star
-            | DepList of term * term
-            | Nil of term
-            | Cons of term * term * term * term
-            | IsNil of term
-            | Head of term | Tail of term
-            | Ann of term * term
-            | Fun of term * term
-
-and
-  declaration = ValBind of Sym.t * term * term 
-
-and
-  value = VId of Sym.t
-          | BinaryOp of (value * value -> value)
-          | UnaryOp of (value -> value)
-          | AbsVal of Sym.t * value * term * environment
-          | VInt of int
-          | VBool of int
-          | TInt
-          | TBool
-          | TList of value * value
-          | VNil of value
-          | VCons of value * value * value * value
-          | VStar
-          | VProd of value list
-          | VFun of Sym.t * value * value
-
-and
-  environment = Env of value Environment.t;;
-
-(***********************************************************************************
-										   *
-     * toString utilities.
-     *
-     * The following is a utility function for making a list of comma-separated
-     * strings where the items separated are arbitrary.
-*)
-let rec toStringList = function
-([], _) -> ""
-  | ([only], toStringer) -> toStringer only
-  | (first::rest, toStringer) -> (toStringer first) ^ ", " ^ toStringList(rest,toStringer)
+type variable =
+| String of string
+| Symbol of string * int
+| Dummy
+    
+type term =
+| Var of variable
+| Star
+| Pi of abstraction
+| Lambda of abstraction
+| App of term * term
+| Int of int
+| Bool of int
+| Ann of term * term
+| If of term * term * term
+| And of term * term
+| Or of term * term
+| Op of term * term list
+| Let of abstraction
+| IntType
+| BoolType
+| List of term * term
+| Prod of term list
+| BinaryOp of (term * term -> term)
+| UnaryOp of (term -> term)
+| Nil of term
+| Cons of term * term * term * term
+| IsNil of term
+| Head of term
+| Tail of term
+    
+and abstraction =
+  variable * term * term
+    
+let fresh =
+  let k = ref 0 in
+  function
+  | String x | Symbol(x, _) ->
+    incr k;
+    Symbol(x, !k)
+  | Dummy ->
+    incr k;
+    Symbol("", !k)
       
-let rec toStringTuple = function
-(first::rest, toStringer) -> (toStringer first) ^ " * " ^ toStringTuple(rest, toStringer)
-  
-(* 
- * make a string for a binding occurrence: x:t
- *)
-let toStringBindOcc name typ toStringer = Sym.format name ^ " : " ^ (toStringer typ)
-  
-(* 
- * make a string for an assignment: M = N
- *)
-let toStringEqual(s1,s2) = s1 ^ " = " ^ s2
-  
-(*
- * The toString function on terms.
- *)
-let rec toString = function
-(Id name) -> Sym.format name
-  
-  | App(Id rator,rand) ->
-      let ras = Sym.format rator in
-      let commaSepStringList = toStringList(rand,toString)
-      in
-      ras ^ "(" ^ commaSepStringList ^ ")"
-        
-  | App(anythingelse,_) -> raise (Failure "Ast: bad application, can't happen.")
-      
-  | If(test,thenpart,elsepart) ->
-      let p1 = toString test in
-      let p2 = toString thenpart in
-      let p3 = toString elsepart
-      in
-      "If(" ^ p1 ^ ", " ^ p2 ^ ", " ^ p3 ^ ")"
-        
-  | Or(left,right) ->
-      let p1 = toString left in
-      let p2 = toString right 
-      in
-      "(" ^ p1 ^ " or " ^ p2 ^ ")"
-        
-  | And(left,right) ->
-      let p1 = toString left in
-      let p2 = toString right
-      in
-      "(" ^ p1 ^ " and " ^ p2 ^ ")"
-        
-  | Let(defn,body) ->
-      let ds = toStringDec(defn) in
-      let bs = toString body
-      in
-      "Let(" ^ ds ^ ", " ^ bs ^ ")"
-  | Bind(defn) ->
-      let ds = toStringDec(defn)
-      in
-      "Bind(" ^ ds ^ ")"
-  | Int(i) ->
-      string_of_int i
-  | Bool(i) ->
-      if i = 0 then "false" else "true"
-  | IntType ->
-      "int"
-  | BoolType ->
-      "bool"
+let rec subst s = function
+  | Var x ->
+    (try List.assoc x s with Not_found -> Var x)
   | Star ->
-      "~"
-  | DepList(len, t) -> 
-      (toString t) ^ " list"
-  | Cons(len, t, hd, tl) -> 
-      (toString t) ^ " list"
-  | Nil(typ) -> 
-      "List(0):" ^ (toString typ)
-  | Ann(id, t) -> let name = toString id in
-                  name ^ ":" ^ (toString t)
-  | Fun(t1, t2) ->
-      (toString t1) ^ "->" ^ (toString t2) 
-        
-and toStringDec = function
-ValBind(id,typ,definition) -> toStringEqual(toStringBindOcc id typ toString, toString definition)
-  
-(*
- * toStringValue : value -> string
- *)
-and toStringValue = function
-AbsVal(_,_,_,_) -> "Closure"
+    Star
+  | Pi a ->
+    Pi (subst_abs s a)
+  | Lambda a ->
+    Lambda (subst_abs s a)
+  | App(e1, e2) ->
+    App(subst s e1, subst s e2)
+  | Int i ->
+    Int i
+  | Bool b ->
+    Bool b
+  | Ann(e1, e2) ->
+    Ann(subst s e1, subst s e2)
+  | If(e1, e2, e3) ->
+    If(subst s e1, subst s e2, subst s e3)
+  | And(e1, e2) ->
+    And(subst s e1, subst s e2)
+  | Or(e1, e2) ->
+    Or(subst s e1, subst s e2)
+  | Op(rator, rands) ->
+    Op(rator, List.map (subst s) rands)
+  | Let(x, typ, e) ->
+    Let(x, subst s typ, subst s e)
+  | IntType ->
+    IntType
+  | BoolType ->
+    BoolType
+  | List(typ, len) ->
+    List(subst s typ, subst s len)
+  | Nil e -> Nil (subst s e)
+  | Cons(len, typ, el, rest) ->
+    Cons(subst s len, subst s typ, subst s el, subst s rest)
+  | IsNil e ->
+    IsNil(subst s e)
+  | Head e ->
+    Head (subst s e)
+  | Tail e ->
+    Tail (subst s e)
 
-  | VId(id) -> Sym.format id  
+and subst_abs s (x, t, e) =
+  let x' = fresh x in
+  (x', subst s t, subst ((x, Var x')::s) e)
 
-  | VInt(i) -> (string_of_int i)
-      
-  | VBool(i) -> let v = if i = 0 then "false" else "true" in v
+let makeString s = String s
 
-  | TInt -> "int"
+let rec toString = function
+  | Var x -> toStringVar x
+  | Star -> "~"
+  | Pi a -> "Pi" ^ (toStringAbs a)
+  | Lambda a -> "Lambda" ^ (toStringAbs a)
+  | App(e, e') -> "App(" ^ (toString e) ^ ", " ^ (toString e') ^ ")"
+  | Int i -> string_of_int i
+  | Bool i -> if i = 0 then "false" else "true"
+  | Ann(e, t) -> toString e
+  | If(e1, e2, e3) ->
+    "if " ^ (toString e1) ^ " then " ^ (toString e2) ^ " else " ^ (toString e3)
+  | And(e1, e2) ->
+    "&(" ^ (toString e1) ^ ", " ^ (toString e2) ^ ")"
+  | Or(e1, e2) ->
+    "||(" ^ (toString e1) ^ ", " ^ (toString e2) ^ ")"
+  | Op(rator, rands) -> (toString rator) ^ "(" ^ (toStringList rands) ^ ")"
+  | Let a -> "Let" ^ (toStringAbs a)
+  | IntType -> "int"
+  | BoolType -> "bool"
+  | List(typ, len) -> (toString typ) ^ " list(" ^ (toString len) ^ ")"
+  | Prod x -> toStringTuple x
+  | BinaryOp fn -> "bi-op"
+  | UnaryOp fn -> "u-op"
+  | Nil e -> "[]:" ^ (toString e)
+  | Cons(len, typ, el, rest) -> "more[" ^ (toString len) ^ " ," ^ (toString typ) ^ "] " ^ (toString el) ^ " " ^ (toString rest)
+  | IsNil e -> "is_nil(" ^ (toString e) ^ ")"
+  | Head e -> "head(" ^ (toString e) ^ ")"
+  | Tail e -> "tail(" ^ (toString e) ^ ")"
 
-  | TBool -> "bool"
-      
-  | VStar -> "~"
-      
-  | VProd(vlist) -> "(" ^ toStringTuple(vlist, toStringValue) ^ ")"
-      
-  | VNil(typ) -> "stop[" ^ (toStringValue typ) ^ "]"
-  | VCons(len, typ, hd, tl) ->
-      "more[" ^ (toStringValue typ) ^ "] " ^ (toStringValue hd) ^ " " ^ (toStringValue tl)
+and toStringTuple = function
+  | [] -> ""
+  | [a] -> toString a
+  | x::xs -> (toString x) ^ " * " ^ (toStringTuple xs)
 
-  | TList(len, v) -> let typ = toStringValue v in
-                     typ ^ " list(" ^ (toStringValue len) ^ ")"
+and toStringList = function
+  | [] -> ""
+  | [only] -> toString only
+  | x::xs -> (toString x) ^ ", " ^ (toStringList xs)
 
-  | VFun(id, v1, v2) -> "pi " ^ (Sym.format id) ^ ":" ^ (toStringValue v1) ^ "." ^ (toStringValue v2)
-                      
-  | _ -> "Unprintable environment value";;
+and toStringVar = function
+  | String s -> s
+  | Symbol(s, i) -> s
 
-
-let rec preOrder = function
-VStar -> [0]
-  | TBool -> [1]
-  | TInt -> [2]
-  | VFun(id, from, too) -> [3] @ preOrder(from) @ preOrder(too)
-  | VProd(l) -> 4 :: List.fold_right (@) (List.map preOrder l) []
-  | VId(id) -> [7]
-  | TList(len, typ) -> match len with
-      VInt(i) -> 5 :: i :: preOrder(typ)
-      | TInt -> 6 :: preOrder(typ)
-
-let rec lexicographicOrder = function
-([], []) -> 0
-  | ([], _) -> -1
-  | (_, []) -> 1
-  | (n1::rest1, n2::rest2) ->
-      (match (Pervasives.compare n1 n2) with
-          0 -> lexicographicOrder(rest1, rest2)
-        | other -> other);;
-
-let compare t t' = lexicographicOrder(preOrder(t),preOrder(t'));;
+and toStringAbs(x, t, e) = "(" ^ (toStringVar x) ^ ", " ^ (toString t) ^ ", " ^ (toString e) ^ ")"

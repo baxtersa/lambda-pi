@@ -20,7 +20,6 @@ rule token = parse
   | '*'     { MULTIPLY }
   | '/'     { DIVIDE }
   | '%'     { MOD }
-  | ":="    { ASSIGN }
   | ':'     { COLON }
   | ';'     { SEMI }
   | "->"    { ARROW }
@@ -28,14 +27,14 @@ rule token = parse
   | "pi"    { PI }
   | "~"     { STAR }
   | '.'     { DOT }
+  | "int"   { INTTYPE }
+  | "bool"  { BOOLTYPE }
+  | "list"  { LIST }
   | "is_nil"{ ISNIL }
   | "head"  { HEAD }
   | "tail"  { TAIL }
   | "stop"  { NIL }
   | "more"  { CONS }
-  | "list"  { LIST }
-  | "int"   { INTTYPE }
-  | "bool"  { BOOLTYPE }
   | "**"    { CARET }
   | "<"     { LT }
   | "<="    { LE }
@@ -55,7 +54,7 @@ rule token = parse
   | "and"   { AND }
   | "or"    { OR }
   | "not"   { NOT }
-  | word+ as string { ID (Symbol.fromString string) }
+  | word+ as string { ID string }
   | '('     { LPAREN }
   | ')'     { RPAREN }
   | '['     { LBRACKET }

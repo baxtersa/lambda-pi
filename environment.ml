@@ -1,12 +1,17 @@
 (*
  * file: environment.ml
  *
- * Robert Muller
- * MC366 Programming Languages
+ * author: Sam Baxter
  *
- * This file contains the environment code for L2.
+ * This file contains the environment code for DepuTy
  *)
 
-module Environment = Map.Make(Symbol);;
+type context = (Ast.variable * (Ast.term * Ast.term option)) list
+
+let lookup_typ x ctx = fst (List.assoc x ctx)
+
+let lookup_value x ctx = snd (List.assoc x ctx)
+
+let extend x t ?value ctx = ctx := (x, (t, value)) :: !ctx
 
 

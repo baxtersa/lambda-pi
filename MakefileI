@@ -9,9 +9,9 @@ OCAMLOPTFLAGS=$(INCLUDES) # add other options for ocamlopt here
 # units: mod1, mod2 and mod3.
 
 # The list of object files for prog1
-PROG1_OBJS=order.cmo util.cmo op.cmo symbol.cmo environment.cmo ast.cmo \
-		label.cmo bases.cmo lexer.cmo parser.cmo dynamicsemantics.cmo \
-		staticsemantics.cmo interpreter.cmo
+PROG1_OBJS= environment.cmo ast.cmo \
+	    basis.cmo lexer.cmo parser.cmo \
+	    staticsemantics.cmo interpreter.cmo
 
 lpi:	$(PROG1_OBJS)
 	$(OCAMLC) -o lpi $(OCAMLFLAGS) unix.cma $(PROG1_OBJS)

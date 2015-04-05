@@ -7,7 +7,7 @@ type token =
   | HEAD
   | TAIL
   | LIST
-  | ID of (Symbol.t)
+  | ID of (string)
   | LPAREN
   | RPAREN
   | LBRACKET
@@ -32,7 +32,6 @@ type token =
   | OR
   | NOT
   | EQ
-  | ASSIGN
   | LT
   | LE
   | CMPEQ
