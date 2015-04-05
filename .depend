@@ -1,0 +1,27 @@
+ast.cmi: symbol.cmi environment.cmo 
+bases.cmi: environment.cmo ast.cmi 
+parser.cmi: ast.cmi 
+ast.cmo: util.cmi symbol.cmi environment.cmo ast.cmi 
+ast.cmx: util.cmx symbol.cmx environment.cmx ast.cmi 
+bases.cmo: util.cmi symbol.cmi environment.cmo ast.cmi \
+    bases.cmi 
+bases.cmx: util.cmx symbol.cmx environment.cmx ast.cmx \
+    bases.cmi 
+environment.cmo: symbol.cmi 
+environment.cmx: symbol.cmx 
+label.cmo: label.cmi 
+label.cmx: label.cmi 
+lexer.cmo: parser.cmi 
+lexer.cmx: parser.cmx 
+op.cmo: op.cmi 
+op.cmx: op.cmi 
+parser.cmo: symbol.cmi ast.cmi parser.cmi 
+parser.cmx: symbol.cmx ast.cmx parser.cmi 
+prim.cmo: prim.cmi 
+prim.cmx: prim.cmi 
+staticsemantics.cmo: symbol.cmi environment.cmo bases.cmi ast.cmi 
+staticsemantics.cmx: symbol.cmx environment.cmx bases.cmx ast.cmx 
+symbol.cmo: symbol.cmi 
+symbol.cmx: symbol.cmi 
+util.cmo: util.cmi 
+util.cmx: util.cmi 
