@@ -1,7 +1,7 @@
 OCAMLC=ocamlc
 OCAMLOPT=ocamlopt
 OCAMLDEP=ocamldep
-SRCDIR=../src
+SRCDIR=.
 OBJDIR=../objects
 INCLUDES=-I $(SRCDIR)
 OCAMLFLAGS=$(INCLUDES)    # add other options for ocamlc here
