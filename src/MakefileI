@@ -1,0 +1,33 @@
+OCAMLC=ocamlc
+OCAMLOPT=ocamlopt
+OCAMLDEP=ocamldep
+SRCDIR=../src
+OBJDIR=../objects
+INCLUDES=-I $(SRCDIR)
+OCAMLFLAGS=$(INCLUDES)    # add other options for ocamlc here
+OCAMLOPTFLAGS=$(INCLUDES) # add other options for ocamlopt here
+
+LPI_OBJS= ast.cmo environment.cmo \
+	    basis.cmo parser.cmo lexer.cmo \
+	    staticsemantics.cmo interpreter.cmo
+# LPI_OBJS= $(patsubst %,$(OBJDIR)/%,$(_LPI_OBJS))
+
+lpi:	$(LPI_OBJS)
+	$(OCAMLC) -o ../lpi $(OCAMLFLAGS) unix.cma $(LPI_OBJS)
+	mv $(SRCDIR)/*.cm* $(OBJDIR)
+
+# Common rules
+.SUFFIXES: .ml .mli .cmo .cmi .cmx
+
+%.cmo: $(SRCDIR)/%.ml
+		 $(OCAMLC) $(OCAMLFLAGS) -c $<
+
+%.cmi: $(SRCDIR)/%.mli
+		 $(OCAMLC) $(OCAMLFLAGS) -c $<
+
+%.cmx: $(SRCDIR)/%.ml
+		 $(OCAMLOPT) $(OCAMLOPTFLAGS) -c $<
+
+# Dependencies
+depend:
+	$(OCAMLDEP) $(INCLUDES) *.ml > $(OBJDIR)/.depend

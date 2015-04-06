@@ -1,4 +1,3 @@
-parser.cmi : ast.cmo
 ast.cmo :
 ast.cmx :
 basis.cmo : environment.cmo ast.cmo
@@ -6,9 +5,9 @@ basis.cmx : environment.cmx ast.cmx
 environment.cmo : ast.cmo
 environment.cmx : ast.cmx
 interpreter.cmo : staticsemantics.cmo parser.cmi lexer.cmo environment.cmo \
-    ast.cmo
+    basis.cmo ast.cmo
 interpreter.cmx : staticsemantics.cmx parser.cmx lexer.cmx environment.cmx \
-    ast.cmx
+    basis.cmx ast.cmx
 lexer.cmo : parser.cmi
 lexer.cmx : parser.cmx
 parser.cmo : ast.cmo parser.cmi
