@@ -10,6 +10,7 @@ end;;
 
 module Interpreter : INTERPRETER =
 struct
+  open Ast;;
   open Basis;;
   open Staticsemantics;;
   open Environment;;
@@ -18,7 +19,18 @@ struct
   let dyBasis = Basis.Interpreter.dynamicBasis;;
   
   let parseInput() =
-    let inch = input_line stdin in
+    let end_of_line = ";;" in
+    let rec getline() =
+      let line = input_line stdin in
+      let line_term = 
+	let substring = 
+	  if String.length line < 2 then ""
+	  else String.sub line (String.length line - 2) 2 in
+	substring in
+      if String.compare line_term end_of_line == 0
+      then line
+      else String.concat " " [line; getline()] in
+    let inch = getline() in
     let lexbuf = Lexing.from_string inch in
     let ast = Parser.input Lexer.token lexbuf in
     ast;;
@@ -68,7 +80,8 @@ struct
 
   let rec makeContext x y = (match x, y with
     | [], [] -> []
-    | (a, b)::s, (c, d)::t -> (a, (b, Some d))::(makeContext s t));;
+    | (a, b)::s, (c, d)::t -> (a, (b, Some d))::(makeContext s t)
+    | _, _ -> raise (Failure "unable to make context\n"));;
 
   let ctx = ref (makeContext stBasis dyBasis);;
 
