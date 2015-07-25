@@ -1,0 +1,6 @@
+let double : pi x:int.int = fn x:int.x * 2;;
+
+let x:int = 2;;
+let y:int = double x;;
+
+x + y;;
