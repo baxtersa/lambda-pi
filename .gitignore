@@ -1,2 +1,6 @@
 *.cm*
 lpi
+tests/*
+src/parser.ml
+src/parser.mli
+src/lexer.ml
