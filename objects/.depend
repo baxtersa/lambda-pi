@@ -1,16 +1,16 @@
-ast.cmo :
-ast.cmx :
-basis.cmo : environment.cmo ast.cmo
-basis.cmx : environment.cmx ast.cmx
-environment.cmo : ast.cmo
+ast.cmo : ast.cmi
+ast.cmx : ast.cmi
+basis.cmo : environment.cmo ast.cmi basis.cmi
+basis.cmx : environment.cmx ast.cmx basis.cmi
+environment.cmo : ast.cmi
 environment.cmx : ast.cmx
 interpreter.cmo : staticsemantics.cmo parser.cmi lexer.cmo environment.cmo \
-    basis.cmo ast.cmo
+    basis.cmi ast.cmi
 interpreter.cmx : staticsemantics.cmx parser.cmx lexer.cmx environment.cmx \
     basis.cmx ast.cmx
 lexer.cmo : parser.cmi
 lexer.cmx : parser.cmx
-parser.cmo : ast.cmo parser.cmi
+parser.cmo : ast.cmi parser.cmi
 parser.cmx : ast.cmx parser.cmi
-staticsemantics.cmo : environment.cmo ast.cmo
+staticsemantics.cmo : environment.cmo ast.cmi
 staticsemantics.cmx : environment.cmx ast.cmx

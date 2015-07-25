@@ -15,6 +15,7 @@
  * extended with an appropriate identifier.
  *)
 
+open Ast;;
 open Environment;;
 
 (* 
@@ -27,6 +28,7 @@ let primOpNames = ["+"; "-"; "*"; "/"; "%"; "**"; "<"; "<="; "=="; "<>"; ">"; ">
 let rec zip = function
   | [], [] -> []
   | x::xs, y::ys -> (x, y)::(zip(xs, ys))
+  | _ -> raise (Failure "cannot zip lists of unequal length\n")
 
 let makeBasis values =
   let primOpNames' = List.map Ast.makeString primOpNames in

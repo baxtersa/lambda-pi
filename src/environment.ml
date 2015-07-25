@@ -5,6 +5,7 @@
  *
  * This file contains the environment code for DepuTy
  *)
+open Ast;;
 
 type context = (Ast.variable * (Ast.term * Ast.term option)) list
 
