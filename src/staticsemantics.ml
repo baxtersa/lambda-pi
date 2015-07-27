@@ -99,12 +99,6 @@ and normalize_abs env (x, t, e) =
   let t' = fst (normalize env t) in
   (x, t', e)
 
-let rec all_true l =
-  (match l with
-  | [] -> true
-  | [x] -> x
-  | x::xs -> x && all_true xs)
-
 let rec apply_list fs ls =
   (match fs, ls with
   | [], [] -> []
@@ -125,7 +119,7 @@ let equal env e1 e2 =
     | Ast.Ann(d1, d2), Ast.Ann(f1, f2) ->
       equal' d1 f1 && equal' d2 f2
     | Ast.Op(r, rands), Ast.Op(r', rands') ->
-      equal' r r' && all_true (apply_list (List.map equal' rands) rands')
+      equal' r r' && List.for_all (fun a -> a && true) (apply_list (List.map equal' rands) rands')
     | Ast.Let a1, Ast.Let a2 ->
       equal_abs a1 a2
     | Ast.IntType, Ast.IntType -> true

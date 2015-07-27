@@ -25,14 +25,9 @@ open Environment;;
  *)
 let primOpNames = ["+"; "-"; "*"; "/"; "%"; "**"; "<"; "<="; "=="; "<>"; ">"; ">="; "not"];;
 
-let rec zip = function
-  | [], [] -> []
-  | x::xs, y::ys -> (x, y)::(zip(xs, ys))
-  | _ -> raise (Failure "cannot zip lists of unequal length\n")
-
 let makeBasis values =
   let primOpNames' = List.map Ast.makeString primOpNames in
-  let keyValuePairs = zip(primOpNames', values) in
+  let keyValuePairs = List.combine primOpNames' values in
   let insert map (key,value) = (key, value)::map
   in
     List.fold_left insert [] keyValuePairs;;
