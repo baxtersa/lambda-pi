@@ -92,31 +92,43 @@ module Interpreter =
 	| (a, b) ->
 	  Ast.Op(Ast.Var(Ast.String("-")), [a;b]));
         
-	(fun (Ast.Int(v1),
-	      Ast.Int(v2)) ->             (* * *)
-	  Ast.Int (v1 * v2));
+	(function
+	| (Ast.Int(v1),
+	   Ast.Int(v2)) ->             (* * *)
+	  Ast.Int (v1 * v2)
+	| a, b -> Ast.Op(Ast.Var(Ast.String("*")), [a;b]));
 	
-	(fun (Ast.Int(v1),
-	      Ast.Int(v2)) ->             (* / *)
-	  Ast.Int (v1 / v2));
+	(function
+	| (Ast.Int(v1),
+	   Ast.Int(v2)) ->             (* / *)
+	  Ast.Int (v1 / v2)
+	| a, b -> Ast.Op(Ast.Var(Ast.String("/")), [a;b]));
 	
-	(fun (Ast.Int(v1),
-	      Ast.Int(v2)) ->             (* % *)
-	  Ast.Int (v1 mod v2));
+	(function
+	| (Ast.Int(v1),
+	   Ast.Int(v2)) ->             (* % *)
+	  Ast.Int (v1 mod v2)
+	| a, b -> Ast.Op(Ast.Var(Ast.String("%")), [a;b]));
 	
-	(fun (Ast.Int(v1),
-	      Ast.Int(v2)) ->             (* ** *)
+	(function
+	| (Ast.Int(v1),
+	   Ast.Int(v2)) ->             (* ** *)
 	  let v1' = float_of_int v1 in
           let v2' = float_of_int v2 in
-          Ast.Int(int_of_float(v1' ** v2')));
+          Ast.Int(int_of_float(v1' ** v2'))
+	| a, b -> Ast.Op(Ast.Var(Ast.String("**")), [a;b]));
 	
-	(fun (Ast.Int(v1),
-	      Ast.Int(v2)) ->             (* < *)
-	  Ast.Bool(if v1 < v2 then 1 else 0));
+	(function
+	| (Ast.Int(v1),
+	   Ast.Int(v2)) ->             (* < *)
+	  Ast.Bool(if v1 < v2 then 1 else 0)
+	| a, b -> Ast.Op(Ast.Var(Ast.String("<")), [a;b]));
 	
-	(fun (Ast.Int(v1),
-	      Ast.Int(v2)) ->             (* <= *)
-	  Ast.Bool(if v1 <= v2 then 1 else 0));
+	(function
+	| (Ast.Int(v1),
+	   Ast.Int(v2)) ->             (* <= *)
+	  Ast.Bool(if v1 <= v2 then 1 else 0)
+	| a, b -> Ast.Op(Ast.Var(Ast.String("<=")), [a;b]));
 	
 	(function
 	| (Ast.Int(v1),
