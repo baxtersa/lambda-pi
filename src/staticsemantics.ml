@@ -204,15 +204,21 @@ let rec infer env = function
     check_equal env e1' Ast.BoolType;
     Ast.BoolType
   | Ast.Or(e1, e2) ->
-    let [e1'; e2'] = List.map (infer env) [e1; e2] in
-    check_equal env e1' e2';
-    check_equal env e1' Ast.BoolType;
-    Ast.BoolType
+    let lst = List.map (infer env) [e1; e2] in
+    (match lst with
+    | [e1'; e2'] -> 
+      check_equal env e1' e2';
+      check_equal env e1' Ast.BoolType;
+      Ast.BoolType
+    | _ -> raise (Failure "Ast.Or does not type-check\n"))
   | Ast.Op(rator, rands) ->
-    let (x, Ast.Prod s, t) = infer_pi env rator in
-    let e = List.map (infer env) rands in
-    apply_list (List.map (check_equal env) s) e;
-    Ast.subst [(x, Ast.Prod rands)] t
+    let (x, prod, t) = infer_pi env rator in
+    (match prod with
+    | Ast.Prod s ->
+      let e = List.map (infer env) rands in
+      let _ = apply_list (List.map (check_equal env) s) e in
+      Ast.subst [(x, Ast.Prod rands)] t
+    | _ -> raise (Failure "Ast.Op does not type-check\n"))
   | Ast.Prod x -> Ast.Prod (List.map (infer env) x)
   | Ast.Let(x, typ, e) ->
     let temp = !env in
