@@ -14,6 +14,7 @@ struct
   open Basis;;
   open Staticsemantics;;
   open Environment;;
+  open Interpret;;
   
   let stBasis = Basis.Interpreter.staticBasis;;
   let dyBasis = Basis.Interpreter.dynamicBasis;;
@@ -73,45 +74,29 @@ struct
 	);
       
       try 
-        (let ast = parseInput()
-         in (try
-	       (
-		 let e = Staticsemantics.infer context ast in
-		 let t, ctx' = Staticsemantics.normalize context ast in
-		 (
-		   str_out := String.concat "" [Ast.toString t; ":"; 
-						Ast.toString e; "\n"];
-		   if not !quiet
-		   then
-		     (
-		       output_string stdout !str_out;
-		       flush stdout;
-		     );
-		   interpreter ctx'
-		 )
-	       )
-	   with Failure s ->
-	     (
-	       output_string stdout s;
-	       flush stdout;
-	       interpreter context
-	     )
-	 )
+        (let ast = parseInput() in
+         let result = Interpret.interpret ast context in
+         match result with
+         | Interpret.Left (typ, v, ctx') ->
+            (
+              str_out := String.concat "" [Ast.toString v; ":";
+                                           Ast.toString typ; "\n"];
+              if not !quiet
+              then
+                (
+                  output_string stdout !str_out;
+                  flush stdout;
+                );
+              interpreter ctx'
+            )
+         | Interpret.Right s ->
+            (
+              output_string stdout s;
+              flush stdout;
+              interpreter context;
+            )
 	)
-      with 
-      | Parsing.Parse_error ->
-	(
-	  output_string stdout "Input string does not parse...\n";
-	  flush stdout;
-	  interpreter context
-	)
-      | Failure s ->
-	(
-	  output_string stdout "Input does not type-check...\n";
-	  flush stdout;
-	  interpreter context
-	)
-      | Exit as ex -> raise ex
+      with Exit as ex -> raise ex
     );;
 
   let rec makeContext x y = (match x, y with

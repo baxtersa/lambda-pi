@@ -9,7 +9,7 @@ OCAMLOPTFLAGS=$(INCLUDES) # add other options for ocamlopt here
 
 LPI_OBJS= ast.cmo environment.cmo \
 	    basis.cmo parser.cmo lexer.cmo \
-	    staticsemantics.cmo interpreter.cmo
+	    staticsemantics.cmo interpret.cmo interpreter.cmo
 # LPI_OBJS= $(patsubst %,$(OBJDIR)/%,$(_LPI_OBJS))
 
 lpi:	$(LPI_OBJS)
