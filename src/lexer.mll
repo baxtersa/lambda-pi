@@ -12,7 +12,6 @@ rule token = parse
   | [' ' '\t' '\n']{ token lexbuf }
   | ','     { COMMA }
   | digit+
-  | "." digit+
   | digit+ "." digit* as num
       { NUM (int_of_string num) }
   | '+'     { PLUS }
