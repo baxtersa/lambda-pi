@@ -59,11 +59,8 @@ struct
       if String.compare line_term end_of_line == 0
       then line
       else String.concat " " [line; getline()] in
-    let inch = getline() in
-    let lexbuf = Lexing.from_string inch in
-    let ast = Parser.input Lexer.token lexbuf in
-    ast;;
-  
+    getline() |> Interpret.ast_from_string;;
+    
   let rec interpreter context : unit =
     (
       if not !quiet
@@ -74,7 +71,13 @@ struct
 	);
       
       try 
-        (let ast = parseInput() in
+        (let ast =
+           match parseInput() with
+           | Some ast' ->
+              ast'
+           | None ->
+              raise Parsing.Parse_error
+         in
          let result = Interpret.interpret ast context in
          match result with
          | Interpret.Left (typ, v, ctx') ->
@@ -96,7 +99,14 @@ struct
               interpreter context;
             )
 	)
-      with Exit as ex -> raise ex
+      with
+      | Parsing.Parse_error ->
+         (
+           output_string stdout "Error: bad syntax";
+           flush stdout;
+           interpreter context
+         )
+      | Exit as ex -> raise ex
     );;
 
   let rec makeContext x y = (match x, y with

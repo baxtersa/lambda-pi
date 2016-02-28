@@ -11,6 +11,13 @@ module Interpret =
     let stBasis = Basis.Interpreter.staticBasis
     let dyBasis = Basis.Interpreter.dynamicBasis
 
+    let ast_from_string source =
+      let lexbuf = Lexing.from_string source in
+      try
+        Some (Parser.input Lexer.token lexbuf)
+      with Parsing.Parse_error ->
+        None
+                    
     let interpret ast ctx =
       try
         (
