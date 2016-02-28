@@ -3,7 +3,7 @@
  *
  * author: Sam Baxter
  *
- * This file contains the environment code for DepuTy
+ * This file contains the environment code for lambda-pi
  *)
 open Ast;;
 

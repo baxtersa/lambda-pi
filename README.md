@@ -1,8 +1,8 @@
-# DepuTy
+# lambda-pi
 ### Build Instructions:
  
 From a command line:
- 1. ```cd <path-to>/DepuTy/src```
+ 1. ```cd <path-to>/lambda-pi/src```
  2. ```ocamllex lexer.mll```
  3. ```ocamlyacc parser.mly```
  4. ```make depend```
@@ -12,13 +12,13 @@ You should now have an executable file 'lpi' in the top level directory!
 If you don't, maybe you don't have the necessary Ocaml toolchain or something?
 
 ### REPL
- 1. ```cd <path-to>/Deputy/```
+ 1. ```cd <path-to>/lambda-pi/```
  2. ```./lpi```
 
 This should enter the interactive read-eval-print-loop, where you can line-by-line enter lpi commands and see all of the syntax errors you will inevitably make :).
 
 Alternatively, the following sequence of commands:
- 1. ```cd <path-to>/Deputy/```
+ 1. ```cd <path-to>/lambda-pi/```
  2. ```./lpi file.lpi```,
 
 will run the interpreter on the source file ```file.lpi``` and print the result of the final line in the file.  Eventually I'll get around to writing a std lib to issue ```print`` calls so that you're not restricted to printing the result of the final sequentially executed instruction.
