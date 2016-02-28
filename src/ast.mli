@@ -28,6 +28,7 @@ sig
 	      | IsNil of term
 	      | Head of term
 	      | Tail of term
+              | Seq of term * term
 		  
   and abstraction =
     variable * term * term

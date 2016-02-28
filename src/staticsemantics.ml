@@ -94,6 +94,10 @@ let rec normalize env = function
     | Ast.Cons(_,_,_,e) -> (e, env)
     | Ast.Nil e -> (Ast.Nil e, env)
     | _ -> raise (Failure "Cannot normalize tail of anything other than a list\n"))
+  | Ast.Seq (e1, e2) ->
+     let (e1', env') = normalize env e1 in
+     normalize env' e2
+     
 
 and normalize_abs env (x, t, e) =
   let t' = fst (normalize env t) in
@@ -141,7 +145,9 @@ let equal env e1 e2 =
     | Ast.Head a, Ast.Head b ->
       equal' a b
     | Ast.Tail a, Ast.Tail b ->
-      equal' a b
+       equal' a b
+    | Ast.Seq (a, b), Ast.Seq(x, y) ->
+       equal' a x && equal' b y
     | _, _ -> false)
 
   and equal_abs (x, t, e1) (x', t', e2) =
@@ -275,6 +281,9 @@ let rec infer env = function
     | Ast.List(t, a) ->
       Ast.List(t, Ast.Op(Ast.Var(Ast.String("-")), [a; Ast.Int 1]))
     | _ -> raise (Failure "Ast.Tail does not type-check\n"))
+  | Ast.Seq (e1, e2) ->
+     let (_, env') = normalize env e1 in
+     infer env' e2
   | _ -> raise (Failure "General input does not type-check\n")
 
 and infer_pi env e =

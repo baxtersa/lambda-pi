@@ -38,6 +38,7 @@ struct
 	      | IsNil of term
 	      | Head of term
 	      | Tail of term
+              | Seq of term * term
 		  
   and abstraction =
     variable * term * term
@@ -98,7 +99,9 @@ struct
       Head (subst s e)
     | Tail e ->
       Tail (subst s e)
-	
+    | Seq(e1, e2) ->
+       Seq (subst s e1, subst s e2)
+           
   and subst_abs s (x, t, e) =
     let x' = fresh x in
     (x', subst s t, subst ((x, Var x')::s) e)
@@ -133,6 +136,8 @@ struct
     | IsNil e -> "is_nil(" ^ (toString e) ^ ")"
     | Head e -> "head(" ^ (toString e) ^ ")"
     | Tail e -> "tail(" ^ (toString e) ^ ")"
+    | Seq (e1, e2) ->
+       (toString e1) ^ ";;\n" ^ (toString e2)
       
   and toStringTuple = function
     | [] -> ""
