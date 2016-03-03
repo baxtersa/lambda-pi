@@ -1,23 +1,37 @@
 OCAMLC=ocamlc
+OCAMLFIND_C=ocamlfind ocamlc
 OCAMLOPT=ocamlopt
 OCAMLDEP=ocamldep
 SRCDIR=.
 OBJDIR=../objects
 INCLUDES=-I $(SRCDIR)
 OCAMLFLAGS=$(INCLUDES)    # add other options for ocamlc here
+OCAMLFIND_FLAGS=-linkpkg -package lwt,cohttp,cohttp.lwt,core -thread \
+		$(INCLUDES)
 OCAMLOPTFLAGS=$(INCLUDES) # add other options for ocamlopt here
 
-LPI_OBJS= ast.cmo environment.cmo \
-	    basis.cmo parser.cmo lexer.cmo \
-	    staticsemantics.cmo interpret.cmo interpreter.cmo
-# LPI_OBJS= $(patsubst %,$(OBJDIR)/%,$(_LPI_OBJS))
+LIBLPI_OBJS= ast.cmo environment.cmo basis.cmo parser.cmo \
+	     lexer.cmo staticsemantics.cmo interpret.cmo
+
+LPI_OBJS= $(LIBLPI_OBJS) interpreter.cmo
+
+LPI_SERVER_OBJS= $(LIBLPI_OBJS) main.cmo
 
 lpi:	$(LPI_OBJS)
 	$(OCAMLC) -o ../lpi $(OCAMLFLAGS) unix.cma $(LPI_OBJS)
 	mv $(SRCDIR)/*.cm* $(OBJDIR)
 
+server: $(LPI_SERVER_OBJS)
+	$(OCAMLFIND_C) -o ../lpi-server $(OCAMLFIND_FLAGS) $(LPI_SERVER_OBJS)
+	mv $(SRCDIR)/*.cm* $(OBJDIR)
+
 # Common rules
 .SUFFIXES: .ml .mli .cmo .cmi .cmx
+
+main.cmo: $(SRCDIR)/main.ml
+		 ocamlfind $(OCAMLC) $(OCAMLFLAGS) \
+		 -package lwt,cohttp,cohttp.lwt,core \
+		 -thread  -c $<$
 
 %.cmo: $(SRCDIR)/%.ml
 		 $(OCAMLC) $(OCAMLFLAGS) -c $<
@@ -31,3 +45,7 @@ lpi:	$(LPI_OBJS)
 # Dependencies
 depend:
 	$(OCAMLDEP) $(INCLUDES) *.ml > $(OBJDIR)/.depend
+
+install: $(LIBLPI_OBJS)
+	 $(OCAMLC) -a -o ../liblpi.cma $(OCAMLFLAGS) unix.cma $(LIBLPI_OBJS)
+	 mv $(SRCDIR)/*.cm* $(OBJDIR)

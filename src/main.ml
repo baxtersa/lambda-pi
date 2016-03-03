@@ -3,8 +3,12 @@ module Main =
     open Ast
     open Basis
     open Interpret
+
     open Core.Std
-           
+    open Lwt
+    open Cohttp
+    open Cohttp_lwt_unix
+
     let st_basis = Basis.Interpreter.staticBasis
     let dy_basis = Basis.Interpreter.dynamicBasis
 
@@ -44,10 +48,6 @@ module Main =
             s)
       | None ->
          "Syntax Error: " ^ source
-
-    open Lwt
-    open Cohttp
-    open Cohttp_lwt_unix
 
     let respond_with_status_and_body status body =
       Server.respond_string ~status:status ~body:body ()
