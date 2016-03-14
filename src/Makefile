@@ -1,4 +1,4 @@
--include MakeFileI
+include MakeFileI
 
 clean:
 	rm -f ../lpi-repl ../lpi-server ../liblpi.cma
