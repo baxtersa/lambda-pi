@@ -6,22 +6,26 @@ SRCDIR=.
 OBJDIR=../objects
 INCLUDES=-I $(SRCDIR)
 OCAMLFLAGS=$(INCLUDES)    # add other options for ocamlc here
-OCAMLFIND_FLAGS=-linkpkg -package lwt,cohttp,cohttp.lwt,core -thread \
+OCAMLFIND_FLAGS=-linkpkg -package lwt,cohttp,cohttp.lwt,core,lpi -thread \
 		$(INCLUDES)
 OCAMLOPTFLAGS=$(INCLUDES) # add other options for ocamlopt here
 
 LIBLPI_OBJS= ast.cmo environment.cmo basis.cmo parser.cmo \
 	     lexer.cmo staticsemantics.cmo interpret.cmo
 
-LPI_OBJS= $(LIBLPI_OBJS) interpreter.cmo
+LPI_OBJS= interpreter.cmo
 
-LPI_SERVER_OBJS= $(LIBLPI_OBJS) main.cmo
+LPI_SERVER_OBJS= main.cmo
 
+build: 	$(LIBLPI_OBJS)
+	$(OCAMLC) -a -o ../liblpi.cma $(OCAMLFLAGS) unix.cma $(LIBLPI_OBJS)
+	mv $(SRCDIR)/*.cm* $(OBJDIR)
+	
 lpi:	$(LPI_OBJS)
-	$(OCAMLC) -o ../lpi $(OCAMLFLAGS) unix.cma $(LPI_OBJS)
+	$(OCAMLC) -o ../lpi-repl $(OCAMLFLAGS) ../liblpi.cma $(LPI_OBJS)
 	mv $(SRCDIR)/*.cm* $(OBJDIR)
 
-server: $(LPI_SERVER_OBJS)
+server:
 	$(OCAMLFIND_C) -o ../lpi-server $(OCAMLFIND_FLAGS) $(LPI_SERVER_OBJS)
 	mv $(SRCDIR)/*.cm* $(OBJDIR)
 

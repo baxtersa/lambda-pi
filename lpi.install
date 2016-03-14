@@ -1,0 +1,2 @@
+lib: ["liblpi.cma"]
+bin: ["lpi-repl"]

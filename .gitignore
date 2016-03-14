@@ -1,5 +1,5 @@
 *.cm*
-*lpi*
+lpi-repl
 src/parser.ml
 src/parser.mli
 src/lexer.ml
