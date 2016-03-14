@@ -16,8 +16,6 @@ lexer.cmo : parser.cmi
 lexer.cmx : parser.cmx
 main.cmo : interpret.cmi basis.cmi ast.cmi
 main.cmx : interpret.cmx basis.cmx ast.cmx
-mips.cmo : mips.cmi
-mips.cmx : mips.cmi
 parser.cmo : ast.cmi parser.cmi
 parser.cmx : ast.cmx parser.cmi
 staticsemantics.cmo : environment.cmo ast.cmi
