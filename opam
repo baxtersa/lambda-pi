@@ -14,7 +14,7 @@ build: [
   [make "-C" "src/"]
   [make "-C" "src/" "lpi"]
 ]
-install: ["ocamlfind" "install" "lpi" "META" "liblpi.cma" "lpi-repl"]
+install: [make "install"]
 remove: ["ocamlfind" "remove" "lpi"]
 depends: [
   "ocamlfind" {build}

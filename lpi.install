@@ -1,2 +1,2 @@
-lib: ["liblpi.cma"]
+lib: ["lpi.cma"]
 bin: ["lpi-repl"]
