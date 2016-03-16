@@ -14,7 +14,7 @@ build: [
   [make "-C" "src/"]
   [make "-C" "src/" "lpi"]
 ]
-install: [make "install"]
+install: [make "-C" "src/" "install"]
 remove: ["ocamlfind" "remove" "lpi"]
 depends: [
   "ocamlfind" {build}
