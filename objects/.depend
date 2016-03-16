@@ -14,8 +14,6 @@ interpreter.cmx : staticsemantics.cmx interpret.cmx environment.cmx \
     basis.cmx ast.cmx
 lexer.cmo : parser.cmi
 lexer.cmx : parser.cmx
-main.cmo : interpret.cmi basis.cmi ast.cmi
-main.cmx : interpret.cmx basis.cmx ast.cmx
 parser.cmo : ast.cmi parser.cmi
 parser.cmx : ast.cmx parser.cmi
 staticsemantics.cmo : environment.cmo ast.cmi
