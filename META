@@ -1,0 +1,6 @@
+package "lpi" (
+    version="0.0.2"
+    description="Dependently-typed programming language"
+    requires="unix"
+    archive(byte)="liblpi.cma"
+)

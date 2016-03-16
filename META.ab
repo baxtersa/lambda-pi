@@ -1,2 +1,0 @@
-version = $(pkg_version)
-description = "Dependently-typed programming language"
